@@ -311,6 +311,8 @@ screen navigation():
 
         textbutton _("Load") action ShowMenu("load")
 
+        textbutton _("Gallery") action [ShowMenu("gallery_navigation"), Show("gallery_sword")]
+        
         textbutton _("Preferences") action ShowMenu("preferences")
 
         if _in_replay:
