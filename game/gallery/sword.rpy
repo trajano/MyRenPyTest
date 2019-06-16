@@ -33,6 +33,3 @@ screen gallery_sword():
             null
             null
             null
-
-image CG_sword_lying = "sword-lying-waiting.png"
-
