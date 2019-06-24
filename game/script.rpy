@@ -10,7 +10,7 @@ define e = Character("Eileen")
 
 label start:
 
-    scene bg holodeck
+    scene bg field
     show sword
     pause
     show sword aim

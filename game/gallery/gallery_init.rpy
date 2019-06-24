@@ -2,14 +2,11 @@ init python:
     g = Gallery()
 
     g.button("sword")
-    # g.image("bg holodeck", "sword")
-    # g.image("bg holodeck", "sword aim")
-    # g.image("bg holodeck", "sword fire")
-    # g.unlock("bg holodeck", "sword")
-    # g.unlock("bg holodeck", "sword aim")
-    # g.unlock("bg holodeck", "sword fire")
-    g.unlock_image("bg holodeck", "sword")
-    g.unlock_image("bg holodeck", "sword aim")
-    g.unlock_image("bg holodeck", "sword fire")
-        
+    g.image("bg holodeck", "sword")
+    g.unlock("sword")
+    g.image("bg holodeck", "sword aim")
+    g.unlock("sword aim")
+    g.image("bg holodeck", "sword fire")
+    g.unlock("sword fire")
+    
     g.transition = dissolve
