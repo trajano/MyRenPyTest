@@ -1,6 +1,12 @@
 ﻿init python:
     def callback(event, interact=True, **kwargs):
-        pass
+        if not interact:
+            return
+
+        if event == "show_done":
+            renpy.sound.play("audio/sfx-blipfemale.mp3", loop = True)
+        elif event == "slow_done":
+            renpy.sound.stop()
 
 define e = Character("Eileen", callback=callback)
 
