@@ -17,7 +17,7 @@ image sword fire = Movie(
         start_image = "sword-fire_S.png",
         image = "sword-fire.png",
         side_mask=True,
-        loop = False
+        loop = True
     )
 
 image sword thumbnail:

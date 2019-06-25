@@ -1,10 +1,17 @@
-﻿# The script of the game goes in this file.
-
-# Declare characters used by this game. The color argument colorizes the
-# name of the character.
-
-define e = Character("Eileen")
-
+﻿init python:
+     def callback(event, interact=True, **kwargs):
+        renpy.log(event)
+        
+        if event == "show":
+            renpy.show("sword fire")
+        elif event == "show_done":
+            pass
+            # renpy.show("sword aim")
+        elif event == "slow_done":
+            renpy.show("sword aim")
+ 
+define e = Character("Sword", callback=callback)
+# define config.log = "D:\\r\\log.log"
 
 # The game starts here.
 
@@ -15,21 +22,12 @@ label start:
     # images directory to show it.
 
     scene bg field
-    show sword
-    pause
-
-    # This shows a character sprite. A placeholder is used, but you can
-    # replace it by adding a file named "eileen happy.png" to the images
-    # directory.
-
-    show eileen happy
+    show sword fire
 
     # These display lines of dialogue.
 
-    e "You've created a new Ren'Py game."
-
-    e "Once you add a story, pictures, and music, you can release it to the world!"
-
+    e "You've created a new Ren'Py game. Once you add a story, pictures, and music, you can release it to the world! You've created a new Ren'Py game. Once you add a story, pictures, and music, you can release it to the world!"
+    pause
     # This ends the game.
 
     return
