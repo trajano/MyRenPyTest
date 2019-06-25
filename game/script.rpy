@@ -4,12 +4,14 @@
         
         if event == "show":
             renpy.show("sword fire")
+ 
         elif event == "show_done":
             pass
             # renpy.show("sword aim")
         elif event == "slow_done":
             renpy.show("sword aim")
- 
+            renpy.restart_interaction()
+            
 define e = Character("Sword", callback=callback)
 # define config.log = "D:\\r\\log.log"
 
@@ -22,7 +24,7 @@ label start:
     # images directory to show it.
 
     scene bg field
-    show sword fire
+    show sword aim
 
     # These display lines of dialogue.
 
