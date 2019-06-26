@@ -22,18 +22,8 @@ image base sword fire = Movie(
 
 image don: 
     "base sword aim"
-    crop (480,0,960, 1080)
+    zoom 0.5
 image don talking: 
     "base sword fire"
-    crop (480,0,960, 1080)
-image bo: 
-    "base sword aim"
-    crop (480,0,960, 1080)
-    yzoom -1.0
-image bo talking: 
-    "base sword fire"
-    crop (480,0,960, 1080)
-    yzoom -1.0
-image sword thumbnail:
-    "sword-ready.png"
-    zoom 0.3
+    zoom 0.5
+
