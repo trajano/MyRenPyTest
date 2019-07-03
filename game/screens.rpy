@@ -759,6 +759,9 @@ screen preferences():
 
                     label _("Text Speed")
 
+                    bar value Preference("text speed", range=20)
+                    textbutton _("Default text speed") action Preference("text speed", value=15)
+
                     bar value Preference("text speed")
 
                     label _("Auto-Forward Time")
