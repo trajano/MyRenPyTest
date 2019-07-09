@@ -66,7 +66,7 @@ init -1 python in speakers:
                                     queue.append("<silence %0.3f>" % speed)
 
                 if token_type == TAG:
-                    match_cps_multiplier = re.match( r'cps\*=([0-9\.]+)', token_text)
+                    match_cps_multiplier = re.match( r'cps=\*([0-9\.]+)', token_text)
                     match_cps = re.match( r'cps=([0-9\.]+)', token_text)
                     match_close_cps = re.match( r'/cps', token_text)
                     if match_cps_multiplier:
