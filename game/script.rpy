@@ -29,7 +29,7 @@ label start:
     {cps=50}But there was this boy, the captain of the chess club in junior high, and whene called me an old bag well I just cried and cried because I had a crush on him you see--{/cps}
     """
 
-    e "Objection!! {cps=*0.3}I object to this{/cps} long testimony"
+    e "Objection!! {cps=*0.3}I object to this{/cps} long testimony {cps=0}(^_^;;{/cps}"
 
     # This ends the game.
 

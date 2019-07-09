@@ -31,6 +31,7 @@ init -1 python in speakers:
                 elif event == "slow_done":
                     speakers.discard(character)
                     renpy.sound.stop()
+                    renpy.restart_interaction()
             return the_callback
 
         def queue_blips(who, what, cps):
@@ -51,7 +52,8 @@ init -1 python in speakers:
                         beeps_needed = int(len(token_text) / cps / blip_length)
                         for i in xrange(beeps_needed):
                             queue.append("<from 0 to %0.3f>%s" % (blip_length, blip_sound))
-
+                    elif cps == 0:
+                        pass
                     else:
                         speed = 1.0/cps
                         for letter in token_text:
@@ -107,6 +109,9 @@ init -1 python in speakers:
         )
 
     def IsSpeaking(character):
+        """
+        This function can be used in a ConditionSwitch to check if a character is speaking or not.
+        """
         return character in speakers
 
 init -1 python in animate:
@@ -132,3 +137,5 @@ init -1 python in animate:
             else:
                 return d, pause
         return DynamicDisplayable(seq)
+
+# define config.log = "D:\\r\log.log"
