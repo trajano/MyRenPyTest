@@ -14,7 +14,7 @@ init -1 python in speakers:
     """
     blip_sound = "audio/sfx-blipfemale.stereo.wav"
 
-    blipwave = AudioSegment.from_wav(os.path.normpath(renpy.loader.get_path(blip_sound)), "rb")
+    blipwave = AudioSegment.from_wav(os.path.normpath(renpy.loader.get_path(blip_sound)))
 
     """
     The length of the blip
@@ -52,6 +52,7 @@ init -1 python in speakers:
                 try:
                     open(fn, "w").close()
                     open(fn, "r").close()
+                    unlink(fn)
                     return True
                 except:
                     return False
@@ -74,11 +75,11 @@ init -1 python in speakers:
             tokens = textsupport.tokenize(unicode(what))
             odd = False
 
-            blipout = AudioSegment(
-                sample_width = blipwave.sample_width,
-                frame_rate = blipwave.frame_rate,
-                channels = blipwave.channels
-            )
+            # blipout = AudioSegment(
+            #     sample_width = blipwave.sample_width,
+            #     frame_rate = blipwave.frame_rate,
+            #     channels = blipwave.channels
+            # )
             # blipout = wave.open(computed_blip_path, "wb")
             # blipout.setframerate(blip_framerate)
             # blipout.setsampwidth(blip_sample_width)
@@ -98,7 +99,7 @@ init -1 python in speakers:
                 # return blip_frames + audioop.tostereo(b'\0' * int(silence_byte_length), 1, 1, 1)
 
             # blipout.writeframes(silence(1.0/cps))
-            blipout += silence(1.0/cps)
+            blipout = silence(1.0/cps)
             for token_type, token_text in tokens:
                 if token_type == TEXT:
                     if blip_length > 1.0/cps:
@@ -143,7 +144,7 @@ init -1 python in speakers:
                         cps = cps_stack.pop()
                     odd = False
             # blipout.close()
-            blipout.export(computed_blip_path, format="wav")
+            blipout.export(computed_blip_path, format="wav").close()
             renpy.sound.play(computed_blip_file)
             # renpy.sound.queue(queue, clear_queue=True, tight=True)
 
