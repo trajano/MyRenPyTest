@@ -15,22 +15,25 @@ label start:
     # replace it by adding a file named "eileen happy.png" to the images
     # directory.
 
-    show eileen happy
+    "{cps=0}mr narrator should not blip{/cps}"
 
-    # These display lines of dialogue.
+    "{cps=0}Going to play an mp3 file{/cps}"
 
-    e "You've created a new Ren'Py game."
+    play sound "audio/sfx-blipfemale.mp3"
 
-    e "Once you add a story, pictures, and music, you can release it to the world!  For now I'm going to start talking like Wendy Oldbag"
+    "{cps=0}Works for me.  Going to play an mono wav file{/cps}"
 
-    e """
-    {cps=50}So just call me \"grandma.\" It's practically my name! So even when I was young I was an Oldbag, but not really that was just my name dearie. Still how the other children would make fun of me and just because of my name can you believe it?{/cps}{nw}
+    play sound "audio/sfx-blipfemale.wav"
 
-    {cps=50}But there was this boy, the captain of the chess club in junior high, and whene called me an old bag well I just cried and cried because I had a crush on him you see--{/cps}
-    """
+    "{cps=0}Didn't work for me.  Going to play a stereo wav file{/cps}"
 
-    e "Objection!! {cps=*0.3}I object to this{/cps} long testimony {cps=0}(^_^;;{/cps}"
+    play sound "audio/sfx-blipfemale.stereo.wav"
 
-    # This ends the game.
+    "{cps=0}Works for me on the PC.  Going to play an OGG file{/cps}"
+
+    play sound "audio/sfx-blipfemale.ogg"
+
+    "{cps=0}Works for me{/cps}"
+
 
     return
