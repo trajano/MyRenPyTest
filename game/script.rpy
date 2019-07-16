@@ -23,8 +23,12 @@ label start:
     show eileen happy
 
     # These display lines of dialogue.
-
-    e "You've created a new Ren'Py game."
+    menu:
+        e "You've created a new Ren'Py game."
+        "yes":
+            e "Yes"
+        "no":
+            e "Still Yes"
 
     e "Once you add a story, pictures, and music, you can release it to the world!"
 
