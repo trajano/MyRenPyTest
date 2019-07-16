@@ -2,6 +2,7 @@ init -1 python in speakers:
     from renpy.text.textsupport import TAG, TEXT
     import renpy.text.textsupport as textsupport
     import os.path
+    import audioop
     import re
     import wave
 
@@ -10,10 +11,9 @@ init -1 python in speakers:
     """
     The sound file containing the blip sound.
     """
-    blip_sound = "audio/sfx-blipfemale.wav"
+    blip_sound = "audio/sfx-blipfemale.stereo.wav"
 
     blipwave = wave.open(os.path.normpath(renpy.loader.get_path(blip_sound)), "rb")
-    blip_length = blipwave.getnframes()
     blip_framerate = blipwave.getframerate()
     blip_frame_length = blipwave.getnframes()
     blip_channels = blipwave.getnchannels()
@@ -24,7 +24,7 @@ init -1 python in speakers:
     """
     The length of the blip
     """
-    blip_length = blip_frame_length / blip_framerate
+    blip_length = 1.0 * blip_frame_length / blip_framerate
 
 
     def Character(name, image=None, **kwargs):
@@ -55,7 +55,7 @@ init -1 python in speakers:
 
             computed_blip_file = "cache/%d.wav" % ( hash( (who, what, cps) ) )
             computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
-            if renpy.loadable(computed_blip_file):
+            if os.path.isfile(computed_blip_path):
                 renpy.sound.play(computed_blip_file)
                 return
 
@@ -71,15 +71,15 @@ init -1 python in speakers:
             # initial character gap
 
             def silence(seconds):
-                silence_byte_length = seconds *  blip_framerate * blip_sample_width
-                return b'\0' * int(silence_byte_length)
+                silence_byte_length = seconds *  blip_framerate * 2
+                return audioop.tostereo(b'\0' * int(silence_byte_length), 1, 1, 1)
 
             def blip(seconds):
-                silence_byte_length = (seconds *  blip_framerate - blip_frame_length) * blip_sample_width
-                return blip_frames + b'\0' * int(silence_byte_length)
+                silence_byte_length = ((seconds - blip_length) *  blip_framerate ) * 2
+                return blip_frames + audioop.tostereo(b'\0' * int(silence_byte_length), 1, 1, 1)
 
             # queue.append("<silence %0.2f>" % (1.0/cps))
-            blipout.writeframesraw(silence(1.0/cps))
+            blipout.writeframes(silence(1.0/cps))
 
             for token_type, token_text in tokens:
                 if token_type == TEXT:
@@ -88,7 +88,7 @@ init -1 python in speakers:
                         beeps_needed = int(len(token_text) / cps / blip_length)
                         for i in xrange(beeps_needed):
                             # queue.append("<from 0 to %0.3f>%s" % (blip_length, blip_sound))
-                            blipout.writeframesraw(blip_frames)
+                            blipout.writeframes(blip_frames)
                     elif cps == 0:
                         pass
                     else:
@@ -97,15 +97,15 @@ init -1 python in speakers:
                             odd = not odd
                             if letter in ', ':
                                 # queue.append("<silence %0.3f>" % speed)
-                                blipout.writeframesraw(silence(speed))
+                                blipout.writeframes(silence(speed))
                                 odd = False
                             else:
                                 if odd:
                                     # queue.append("<from 0 to %0.3f>%s" % (speed, blip_sound))
-                                    blipout.writeframesraw(blip(speed))
+                                    blipout.writeframes(blip(speed))
                                 else:
                                     # queue.append("<silence %0.3f>" % speed)
-                                    blipout.writeframesraw(silence(speed))
+                                    blipout.writeframes(silence(speed))
 
                 if token_type == TAG:
                     match_cps_multiplier = re.match( r'cps=\*([0-9\.]+)', token_text)
@@ -180,5 +180,3 @@ init -1 python in animate:
             else:
                 return d, pause
         return DynamicDisplayable(seq)
-
-define config.log = "D:\\r\log.log"
