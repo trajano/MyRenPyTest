@@ -13,18 +13,20 @@ init -1 python in speakers:
     """
     blip_sound = "audio/sfx-blipfemale.stereo.wav"
 
-    blipwave = wave.open(renpy.file(blip_sound))
-    blip_framerate = blipwave.getframerate()
-    blip_frame_length = blipwave.getnframes()
-    blip_channels = blipwave.getnchannels()
-    blip_sample_width = blipwave.getsampwidth()
-    blip_frames = blipwave.readframes(blipwave.getnframes())
-    blipwave.close()
+    def blip_info(filename):
+        wave_file = renpy.file(filename)
+        blipwave = wave.open(wave_file)
+        blip_framerate = blipwave.getframerate()
+        blip_frame_length = blipwave.getnframes()
+        blip_channels = blipwave.getnchannels()
+        blip_sample_width = blipwave.getsampwidth()
+        blip_frames = blipwave.readframes(blipwave.getnframes())
+        blipwave.close()
+        wave_file.close()
+        blip_length = 1.0 * blip_frame_length / blip_framerate
+        return (blip_frames, blip_length, blip_framerate, blip_channels, blip_sample_width)
 
-    """
-    The length of the blip
-    """
-    blip_length = 1.0 * blip_frame_length / blip_framerate
+    (blip_frames, blip_length, blip_framerate, blip_channels, blip_sample_width) = blip_info(blip_sound)
 
     """
     Blip cache.  This is not an LRU, and data here will be removed non-deterministically
