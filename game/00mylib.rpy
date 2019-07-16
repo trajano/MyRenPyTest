@@ -1,19 +1,31 @@
 init -1 python in speakers:
     from renpy.text.textsupport import TAG, TEXT
     import renpy.text.textsupport as textsupport
+    import os.path
     import re
+    import wave
 
     speakers = set()
 
     """
-    The length of the blip
-    """
-    blip_length = 0.05
-
-    """
     The sound file containing the blip sound.
     """
-    blip_sound = "audio/sfx-blipfemale.ogg"
+    blip_sound = "audio/sfx-blipfemale.wav"
+
+    blipwave = wave.open(os.path.normpath(renpy.loader.get_path(blip_sound)), "rb")
+    blip_length = blipwave.getnframes()
+    blip_framerate = blipwave.getframerate()
+    blip_frame_length = blipwave.getnframes()
+    blip_channels = blipwave.getnchannels()
+    blip_sample_width = blipwave.getsampwidth()
+    blip_frames = blipwave.readframes(blipwave.getnframes())
+    blipwave.close()
+
+    """
+    The length of the blip
+    """
+    blip_length = blip_frame_length / blip_framerate
+
 
     def Character(name, image=None, **kwargs):
         if image == None:
@@ -40,18 +52,43 @@ init -1 python in speakers:
             If the CPS is higher frequency than the blip length, it switches to Wendy Oldbag mode where it just beeps as fast
             as it can.
             """
+
+            computed_blip_file = "cache/%d.wav" % ( hash( (who, what, cps) ) )
+            computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
+            if renpy.loadable(computed_blip_file):
+                renpy.sound.play(computed_blip_file)
+                return
+
             tokens = textsupport.tokenize(unicode(what))
             odd = False
-            queue = []
+
+            blipout = wave.open(computed_blip_path, "wb")
+            blipout.setframerate(blip_framerate)
+            blipout.setsampwidth(blip_sample_width)
+            blipout.setnchannels(blip_channels)
+
             cps_stack = []
-            queue.append("<silence %0.2f>" % (1.0/cps))
+            # initial character gap
+
+            def silence(seconds):
+                silence_byte_length = seconds *  blip_framerate * blip_sample_width
+                return b'\0' * int(silence_byte_length)
+
+            def blip(seconds):
+                silence_byte_length = (seconds *  blip_framerate - blip_frame_length) * blip_sample_width
+                return blip_frames + b'\0' * int(silence_byte_length)
+
+            # queue.append("<silence %0.2f>" % (1.0/cps))
+            blipout.writeframesraw(silence(1.0/cps))
+
             for token_type, token_text in tokens:
                 if token_type == TEXT:
                     if cps > (1.0 / blip_length):
                         # Wendy Oldbag Speed at this point assume 0.05 seconds and just keep on playing until it reaches the end of the segment.
                         beeps_needed = int(len(token_text) / cps / blip_length)
                         for i in xrange(beeps_needed):
-                            queue.append("<from 0 to %0.3f>%s" % (blip_length, blip_sound))
+                            # queue.append("<from 0 to %0.3f>%s" % (blip_length, blip_sound))
+                            blipout.writeframesraw(blip_frames)
                     elif cps == 0:
                         pass
                     else:
@@ -59,13 +96,16 @@ init -1 python in speakers:
                         for letter in token_text:
                             odd = not odd
                             if letter in ', ':
-                                queue.append("<silence %0.3f>" % speed)
+                                # queue.append("<silence %0.3f>" % speed)
+                                blipout.writeframesraw(silence(speed))
                                 odd = False
                             else:
                                 if odd:
-                                    queue.append("<from 0 to %0.3f>%s" % (speed, blip_sound))
+                                    # queue.append("<from 0 to %0.3f>%s" % (speed, blip_sound))
+                                    blipout.writeframesraw(blip(speed))
                                 else:
-                                    queue.append("<silence %0.3f>" % speed)
+                                    # queue.append("<silence %0.3f>" % speed)
+                                    blipout.writeframesraw(silence(speed))
 
                 if token_type == TAG:
                     match_cps_multiplier = re.match( r'cps=\*([0-9\.]+)', token_text)
@@ -80,7 +120,10 @@ init -1 python in speakers:
                     elif match_close_cps:
                         cps = cps_stack.pop()
                     odd = False
-            renpy.sound.queue(queue, clear_queue=True, tight=True)
+            blipout.close()
+            renpy.log(computed_blip_path)
+            renpy.sound.play(computed_blip_file)
+            # renpy.sound.queue(queue, clear_queue=True, tight=True)
 
         def blip_show_function(who, what, **kwargs):
             cps = renpy.game.preferences.text_cps
@@ -138,4 +181,4 @@ init -1 python in animate:
                 return d, pause
         return DynamicDisplayable(seq)
 
-# define config.log = "D:\\r\log.log"
+define config.log = "D:\\r\log.log"
