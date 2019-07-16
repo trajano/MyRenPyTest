@@ -2,7 +2,6 @@ init -1 python in speakers:
     from renpy.text.textsupport import TAG, TEXT
     import renpy.text.textsupport as textsupport
     import os.path
-    import audioop
     import re
     import wave
 
@@ -90,12 +89,12 @@ init -1 python in speakers:
             # initial character gap
 
             def silence(seconds):
-                silence_byte_length = seconds *  blip_framerate * 2
-                return audioop.tostereo(b'\0' * int(silence_byte_length), 1, 1, 1)
+                silence_byte_length = seconds *  blip_framerate * 2 * 2
+                return b'\0' * int(silence_byte_length)
 
             def blip(seconds):
                 silence_byte_length = ((seconds - blip_length) *  blip_framerate ) * 2
-                return blip_frames + audioop.tostereo(b'\0' * int(silence_byte_length), 1, 1, 1)
+                return blip_frames + b'\0' * int(silence_byte_length)
 
             # queue.append("<silence %0.2f>" % (1.0/cps))
             blipout.writeframes(silence(1.0/cps))
