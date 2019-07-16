@@ -12,7 +12,7 @@ init -1 python in speakers:
     """
     blip_sound = "audio/sfx-blipfemale.stereo.wav"
 
-    blipwave = wave.open(os.path.normpath(renpy.loader.get_path(blip_sound)), "rb")
+    blipwave = wave.open(renpy.file(blip_sound))
     blip_framerate = blipwave.getframerate()
     blip_frame_length = blipwave.getnframes()
     blip_channels = blipwave.getnchannels()
@@ -93,7 +93,7 @@ init -1 python in speakers:
                 return b'\0' * int(silence_byte_length)
 
             def blip(seconds):
-                silence_byte_length = ((seconds - blip_length) *  blip_framerate ) * 2
+                silence_byte_length = ((seconds - blip_length) *  blip_framerate ) * 2 * 2
                 return blip_frames + b'\0' * int(silence_byte_length)
 
             # queue.append("<silence %0.2f>" % (1.0/cps))
@@ -139,7 +139,6 @@ init -1 python in speakers:
                         cps = cps_stack.pop()
                     odd = False
             blipout.close()
-            renpy.log(computed_blip_path)
             renpy.sound.play(computed_blip_file)
             # renpy.sound.queue(queue, clear_queue=True, tight=True)
 
