@@ -1,6 +1,5 @@
 ﻿define e = speakers.Character("Eileen")
 
-
 # The game starts here.
 
 label start:
@@ -28,6 +27,9 @@ label start:
     "{cps=0}Didn't work for me.  Going to play a stereo wav file{/cps}"
 
     play sound "audio/sfx-blipfemale.stereo.wav"
+    
+    "{cps=0}Works for me.  Going to play a stereo wav file using renpysound{/cps}"
+    $ renpy.audio.renpysound.play( renpy.audio.audio.get_channel("music").number, renpy.file("audio/sfx-blipfemale.stereo.wav"), "audio/sfx-blipfemale.stereo.wav", tight=True, end=-1)
 
     "{cps=0}Works for me on the PC.  Going to play an OGG file{/cps}"
 
@@ -35,5 +37,14 @@ label start:
 
     "{cps=0}Works for me{/cps}"
 
+    show eileen
+
+    e "testing again"
+
+    e "{cps=2}TeStInG.{/cps}"
+    e "{cps=2}TeStInG{/cps}"
+    e '{cps=50}renpy.audio.renpysound.play( renpy.audio.audio.get_channel("music").number, renpy.file("audio/sfx-blipfemale.stereo.wav"), "audio/sfx-blipfemale.stereo.wav", tight=True, end=-1){/cps}'
+
+    e "TeStInG AgAiN"
 
     return

@@ -2,6 +2,7 @@ init -1 python in speakers:
     from renpy.text.textsupport import TAG, TEXT
     import renpy.text.textsupport as textsupport
     import os.path
+    import io
     import re
     import wave
 
@@ -25,10 +26,20 @@ init -1 python in speakers:
     """
     blip_length = 1.0 * blip_frame_length / blip_framerate
 
+    """
+    Blip cache.  This is not an LRU, and data here will be removed non-deterministically
+    """
+    blip_cache = {}
+
+    """
+    Blip cache limit.  If it reaches this size it removes items from the cache.
+    """
+    blip_cache_limit = 20
 
     def Character(name, image=None, **kwargs):
         if image == None:
             image = name.lower()
+        sound_channel_number = renpy.audio.audio.get_channel("sound").number
 
         def character_callback(character):
             global speakers
@@ -52,50 +63,36 @@ init -1 python in speakers:
             as it can.
             """
 
-            def test_writable(fn):
-                try:
-                    open(fn, "w").close()
-                    open(fn, "r").close()
-                    unlink(fn)
-                    return True
-                except:
-                    return False
+            computed_blip_file = "cache/%d.wav" % ( hash( (who, what, cps) ) )
 
-            def blip_paths():
-                computed_blip_file = "cache/%d.wav" % ( hash( (who, what, cps) ) )
-                computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
-                if test_writable(computed_blip_path):
-                    return (computed_blip_file, computed_blip_path)
+            def play_to_sound_channel(name):
+                renpy.audio.renpysound.play( sound_channel_number, io.BytesIO(blip_cache[name]), name, tight=True, end=-1)
 
-                computed_blip_file = "%s/%d.wav" % ( renpy.config.savedir.replace("\\", "/"), hash( (who, what, cps) ) )
-                computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
-                return (computed_blip_file, computed_blip_path)
-
-            (computed_blip_file, computed_blip_path) = blip_paths()
-
-            if os.path.isfile(computed_blip_path):
-                renpy.sound.play(computed_blip_file)
+            if name in blip_cache:
+                play_to_sound_channel(computed_blip_file)
                 return
 
             tokens = textsupport.tokenize(unicode(what))
             odd = False
-
-            blipout = wave.open(computed_blip_path, "wb")
+            inmemory_wave = io.BytesIO()
+            blipout = wave.open(inmemory_wave, "wb")
             blipout.setframerate(blip_framerate)
             blipout.setsampwidth(blip_sample_width)
             blipout.setnchannels(blip_channels)
 
             cps_stack = []
-            # initial character gap
 
             def silence(seconds):
-                silence_byte_length = seconds *  blip_framerate * 2 * 2
-                return b'\0' * int(silence_byte_length)
+                silence_byte_length = int(seconds *  blip_framerate * blip_channels * blip_sample_width)
+                return b'\0' * silence_byte_length
 
             def blip(seconds):
-                silence_byte_length = ((seconds - blip_length) *  blip_framerate ) * 2 * 2
+                silence_byte_length = ((seconds - blip_length) *  blip_framerate ) * blip_sample_width * blip_channels
+                if silence_byte_length % blip_sample_width != 0:
+                    silence_byte_length -= silence_byte_length % blip_sample_width
                 return blip_frames + b'\0' * int(silence_byte_length)
 
+            # initial character gap
             # queue.append("<silence %0.2f>" % (1.0/cps))
             blipout.writeframes(silence(1.0/cps))
 
@@ -103,7 +100,7 @@ init -1 python in speakers:
                 if token_type == TEXT:
                     if cps > (1.0 / blip_length):
                         # Wendy Oldbag Speed at this point assume 0.05 seconds and just keep on playing until it reaches the end of the segment.
-                        beeps_needed = int(len(token_text) / cps / blip_length)
+                        beeps_needed = int(len(token_text) / cps / blip_length) * 2
                         for i in xrange(beeps_needed):
                             # queue.append("<from 0 to %0.3f>%s" % (blip_length, blip_sound))
                             blipout.writeframes(blip_frames)
@@ -139,8 +136,11 @@ init -1 python in speakers:
                         cps = cps_stack.pop()
                     odd = False
             blipout.close()
-            renpy.sound.play(computed_blip_file)
-            # renpy.sound.queue(queue, clear_queue=True, tight=True)
+            if len(blip_cache) >= blip_cache_limit:
+                blip_cache.popitem()
+            blip_cache[computed_blip_file] = inmemory_wave.getvalue()
+            play_to_sound_channel(computed_blip_file)
+            # renpy.sound.play(computed_blip_file)
 
         def blip_show_function(who, what, **kwargs):
             cps = renpy.game.preferences.text_cps
