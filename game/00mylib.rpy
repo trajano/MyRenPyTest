@@ -15,12 +15,6 @@ init -1 python in speakers:
     blip_sound = "audio/sfx-blipfemale.stereo.wav"
 
     blipwave = AudioSegment.from_wav(os.path.normpath(renpy.loader.get_path(blip_sound)), "rb")
-    # blip_framerate = blipwave.getframerate()
-    # blip_frame_length = blipwave.getnframes()
-    # blip_channels = blipwave.getnchannels()
-    # blip_sample_width = blipwave.getsampwidth()
-    # blip_frames = blipwave.readframes(blipwave.getnframes())
-    # blipwave.close()
 
     """
     The length of the blip
@@ -54,8 +48,25 @@ init -1 python in speakers:
             as it can.
             """
 
-            computed_blip_file = "cache/%d.wav" % ( hash( (who, what, cps) ) )
-            computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
+            def test_writable(fn):
+                try:
+                    open(fn, "w").close()
+                    open(fn, "r").close()
+                    return True
+                except:
+                    return False
+
+            def blip_paths():
+                computed_blip_file = "cache/%d.wav" % ( hash( (who, what, cps) ) )
+                computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
+                if test_writable(computed_blip_path):
+                    return (computed_blip_file, computed_blip_path)
+
+                computed_blip_file = "%s/%d.wav" % ( renpy.config.savedir.replace("\\", "/"), hash( (who, what, cps) ) )
+                computed_blip_path = os.path.normpath(renpy.loader.get_path(computed_blip_file)).replace("\\", "/")
+                return (computed_blip_file, computed_blip_path)
+
+            (computed_blip_file, computed_blip_path) = blip_paths()
             if renpy.loadable(computed_blip_file):
                 renpy.sound.play(computed_blip_file)
                 return
